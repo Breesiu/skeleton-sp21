@@ -15,7 +15,7 @@ public class LinkedListDequeTest {
 
         System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
-        LinkedListDeque<String> lld1 = new LinkedListDeque<String>();
+        LinkedListDeque<String> lld1 = new LinkedListDeque<>();
 
 		assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
 		lld1.addFirst("front");
@@ -42,7 +42,7 @@ public class LinkedListDequeTest {
 
         System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
-        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
 		// should be empty
 		assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
 
@@ -84,9 +84,9 @@ public class LinkedListDequeTest {
     public void multipleParamTest() {
 
 
-        LinkedListDeque<String>  lld1 = new LinkedListDeque<String>();
-        LinkedListDeque<Double>  lld2 = new LinkedListDeque<Double>();
-        LinkedListDeque<Boolean> lld3 = new LinkedListDeque<Boolean>();
+        LinkedListDeque<String>  lld1 = new LinkedListDeque<>();
+        LinkedListDeque<Double>  lld2 = new LinkedListDeque<>();
+        LinkedListDeque<Boolean> lld3 = new LinkedListDeque<>();
 
         lld1.addFirst("string");
         lld2.addFirst(3.14159);
@@ -104,7 +104,7 @@ public class LinkedListDequeTest {
 
         System.out.println("Make sure to uncomment the lines below (and delete this print statement).");
 
-        LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
 
         boolean passed1 = false;
         boolean passed2 = false;
