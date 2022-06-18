@@ -1,8 +1,7 @@
 package capers;
 
 import java.io.File;
-
-import static capers.Dog.DOG_FOLDER;
+import java.io.IOException;
 
 /** A repository for Capers 
  * @author Shichengxin
@@ -34,8 +33,13 @@ public class CapersRepository {
     public static void setupPersistence() {
         // TODO
         CAPERS_FOLDER.mkdir();
-        DOG_FOLDER.createNewFile();
-
+        Dog.DOG_FOLDER.mkdir();
+        File story = Utils.join(".capers","story");
+        try {
+            story.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
