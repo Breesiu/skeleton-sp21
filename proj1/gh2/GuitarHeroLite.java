@@ -24,13 +24,16 @@ public class GuitarHeroLite {
                 } else if (key == 'c') {
                     stringC.pluck();
                 }
+                System.out.println(key);
+                System.out.println(stringA.sample());
+
             }
 
             /* compute the superposition of samples */
             double sample = stringA.sample() + stringC.sample();
-
             /* play the sample on standard audio */
             StdAudio.play(sample);
+
 
             /* advance the simulation of each guitar string by one step */
             stringA.tic();

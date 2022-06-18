@@ -107,6 +107,15 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         }
         return doubleNode.item;
     }
+    public void set(int index, T item) {
+        if (index >= size() || index < 0)
+            return ;
+        DoubleNode doubleNode = sentinel.next;
+        while (index-- != 0) {
+            doubleNode = doubleNode.next;
+        }
+        doubleNode.item = item;
+    }
 
     public LinkedListDeque() {
         size = 0;
