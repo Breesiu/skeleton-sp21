@@ -3,7 +3,7 @@ package capers;
 import java.io.File;
 
 /** Represents a dog that can be serialized.
- * @author TODO
+ * @author Shichengxin
 */
 public class Dog { // TODO
 

@@ -3,7 +3,7 @@ package capers;
 import static capers.Utils.exitWithError;
 
 /** Canine Capers: A Gitlet Prelude.
- * @author TODO
+ * @author Shichengxin
 */
 public class Main {
     /**

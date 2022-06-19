@@ -11,14 +11,13 @@ import java.io.IOException;
  *    - dogs/ -- folder containing all of the persistent data for dogs
  *    - story -- file containing the current story
  *
- * TODO: change the above structure if you do something different.
  */
 public class CapersRepository {
     /** Current Working Directory. */
     static final File CWD = new File(System.getProperty("user.dir"));
 
     /** Main metadata folder. */
-    static final File CAPERS_FOLDER = Utils.join(".capers"); // TODO Hint: look at the `join`
+    static final File CAPERS_FOLDER = Utils.join(".capers");
                                             //      function in Utils
 
     /**
@@ -31,7 +30,6 @@ public class CapersRepository {
      *    - story -- file containing the current story
      */
     public static void setupPersistence() {
-        // TODO
         CAPERS_FOLDER.mkdir();
         Dog.DOG_FOLDER.mkdir();
         File story = Utils.join(".capers","story");
