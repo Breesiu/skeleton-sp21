@@ -48,6 +48,7 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
+        Utils.writeContents(Utils.join(".capers","story"), text);
     }
 
     /**
@@ -57,6 +58,8 @@ public class CapersRepository {
      */
     public static void makeDog(String name, String breed, int age) {
         // TODO
+        Dog dog = new Dog(name, breed, age);
+        dog.saveDog();
     }
 
     /**
@@ -67,5 +70,8 @@ public class CapersRepository {
      */
     public static void celebrateBirthday(String name) {
         // TODO
+        Dog dog = Utils.readObject(Utils.join(Dog.DOG_FOLDER, name), Dog.class);
+        dog.haveBirthday();
+        dog.saveDog();
     }
 }
