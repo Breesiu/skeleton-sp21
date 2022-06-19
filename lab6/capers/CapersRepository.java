@@ -48,9 +48,11 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
-        text = Utils.readContentsAsString(Utils.join(".capers","story")) + '\n'
+        if(Utils.readContentsAsString(Utils.join(".capers","story")).length() != 0)
+            text = Utils.readContentsAsString(Utils.join(".capers","story")) + '\n'
                 + text;
         Utils.writeContents(Utils.join(".capers","story"), text);
+        System.out.print(text);
     }
 
     /**
@@ -62,6 +64,7 @@ public class CapersRepository {
         // TODO
         Dog dog = new Dog(name, breed, age);
         dog.saveDog();
+        System.out.print(dog.toString());
     }
 
     /**
