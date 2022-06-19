@@ -48,6 +48,8 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         // TODO
+        text = Utils.readContentsAsString(Utils.join(".capers","story")) + '\n'
+                + text;
         Utils.writeContents(Utils.join(".capers","story"), text);
     }
 
