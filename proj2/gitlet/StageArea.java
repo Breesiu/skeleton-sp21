@@ -2,8 +2,9 @@ package gitlet;
 
 import java.io.Serializable;
 import java.util.TreeMap;
-import static gitlet.Repository.COMMIT_DIR;
-import static gitlet.Repository.POINT_DIR;
+
+import static gitlet.Lazy.LoadCommit;
+import static gitlet.Repository.*;
 import static gitlet.Utils.*;
 
 public class StageArea implements Serializable {
@@ -14,8 +15,18 @@ public class StageArea implements Serializable {
         stagedForAddition = new TreeMap<>();
         stagedForRemoval = new TreeMap<>();
     }
-    public static void AddFile(String name){
-        Commit commit = readObject(join(COMMIT_DIR, readContentsAsString(join(POINT_DIR, name))), Commit.class);
+    public void AddFile(String name) {
+        Commit commit = LoadCommit(readContentsAsString(join(POINT_DIR, "header")));
+        String hashCode = sha1(readContents(join(SRC_DIR, name)));
+        if (hashCode == commit.getBlobHashCode(name)
+                || stagedForAddition.get(name) == null)
+            stagedForAddition.remove(name);
+        Blob blob = new Blob(hashCode, readContents(join(SRC_DIR, name)));
+        blob.save();
+        stagedForAddition.put(name, hashCode);
 
+    }
+    public void save(){
+        writeObject(join(STAGE_DIR, "stage"), this);
     }
 }

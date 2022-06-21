@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
 
+import static gitlet.Utils.join;
+import static gitlet.Utils.writeObject;
+import static gitlet.Repository.*;
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
@@ -42,7 +45,14 @@ public class Commit implements Serializable {
     public void setHashCode(){
         hashCode = Utils.sha1(Utils.serialize(this));
     }
-    public String  getHashCode(){
+    public String getHashCode(){
         return hashCode;
+    }
+    public String getBlobHashCode(String name){
+        return blobs.get(name);
+    }
+    public void addBlob(){}
+    public void save(){
+        writeObject(join(COMMIT_DIR, getHashCode()), Commit.class);
     }
 }

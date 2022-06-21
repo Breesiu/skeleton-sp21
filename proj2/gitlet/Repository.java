@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 import java.util.Date;
 
+import static gitlet.Lazy.LoadStageArea;
 import static gitlet.Utils.join;
 import static gitlet.Utils.writeContents;
 
@@ -50,16 +51,20 @@ public class Repository {
         initialCommit.setHashCode();
         String master = initialCommit.getHashCode();
         String header = initialCommit.getHashCode();
-
+        initialCommit.save();
+        StageArea stageArea = new StageArea();
+        stageArea.save();
         writeContents(join(POINT_DIR, "master"), master);
         writeContents(join(POINT_DIR, "header"), header);
 
     }
     public static void add(String name){
-        if(!join(SRC_DIR, name).exists()) {
+        if(!join(CWD, name).exists()) {
             System.out.print("File does not exist.");
             System.exit(0);
         }
-        StageArea.AddFile(name);
+        StageArea stageArea = LoadStageArea();
+        stageArea.AddFile(name);
+        stageArea.save();
     }
 }
