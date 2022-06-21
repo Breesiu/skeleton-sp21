@@ -18,15 +18,22 @@ public class Main {
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                validateNum(args.length, 1);
                 Repository.init();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
+                validateNum(args.length, 2);
                 Repository.add(args[1]);
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-
+                if(args.length == 1){
+                    System.out.print("Please enter a commit message.");
+                    System.exit(0);
+                }
+                validateNum(args.length, 2);
+                Repository.commit(args[1]);
                 break;
             case "rm":
 
@@ -62,6 +69,12 @@ public class Main {
             default:
                 System.out.print("No command with that name exists.");
                 System.exit(0);
+        }
+    }
+    public static void validateNum(int Num, int expectNum){
+        if(Num != expectNum){
+            System.out.print("Incorrect operands.");
+            System.exit(0);
         }
     }
 }

@@ -3,7 +3,6 @@ package gitlet;
 import java.io.File;
 import java.util.Date;
 
-import static gitlet.Lazy.LoadStageArea;
 import static gitlet.Utils.join;
 import static gitlet.Utils.writeContents;
 
@@ -47,15 +46,15 @@ public class Repository {
         COMMIT_DIR.mkdir();
         BLOB_DIR.mkdir();
         POINT_DIR.mkdir();
-        Commit initialCommit = new Commit("initial commit", new Date(0), null, null);
+        Commit initialCommit = new Commit("initial commit", new Date(0));
         initialCommit.setHashCode();
         String master = initialCommit.getHashCode();
-        String header = initialCommit.getHashCode();
+        Header header = new Header(initialCommit.getHashCode(), "master");
+        header.save();
         initialCommit.save();
         StageArea stageArea = new StageArea();
         stageArea.save();
         writeContents(join(POINT_DIR, "master"), master);
-        writeContents(join(POINT_DIR, "header"), header);
 
     }
     public static void add(String name){
@@ -63,8 +62,21 @@ public class Repository {
             System.out.print("File does not exist.");
             System.exit(0);
         }
-        StageArea stageArea = LoadStageArea();
+        StageArea stageArea = StageArea.FromFile();
         stageArea.AddFile(name);
         stageArea.save();
+    }
+    public static void commit(String message){
+        StageArea stageArea = StageArea.FromFile();
+        if(stageArea.isEmpty()){
+            System.out.print("No changes added to the commit.");
+            System.exit(0);
+        }
+//        Commit preCommit =
+        if(!stageArea.getStagedForAddition().isEmpty())
+            stageArea.cleanStagedForAddition();
+        if(!stageArea.getStagedForRemoval().isEmpty())
+            stageArea.cleanStagedForRemoval();
+
     }
 }

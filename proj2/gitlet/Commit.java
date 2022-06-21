@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeMap;
 
-import static gitlet.Utils.join;
-import static gitlet.Utils.writeObject;
 import static gitlet.Repository.*;
+import static gitlet.Utils.*;
+
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
@@ -26,6 +26,7 @@ public class Commit implements Serializable {
      */
 
     /** The message of this Commit. */
+
     private String message;
     /* TODO: fill in the rest of this class. */
     private Date date;
@@ -33,11 +34,11 @@ public class Commit implements Serializable {
     private TreeMap<String, String> blobs;
     private String hashCode;
 
-    public Commit(String message, Date date, ArrayList<String> parent, TreeMap<String, String> blobs){
+    public Commit(String message, Date date){
         this.message = message;
         this.date = date;
-        this.parent = parent;
-        this.blobs = blobs;
+        parent = new ArrayList<>();
+        blobs = new TreeMap<>();
     }
     public Commit(){
 
@@ -53,6 +54,9 @@ public class Commit implements Serializable {
     }
     public void addBlob(){}
     public void save(){
-        writeObject(join(COMMIT_DIR, getHashCode()), Commit.class);
+        writeObject(join(COMMIT_DIR, getHashCode()), this);
+    }
+    public static Commit fromFile(String hashCode){
+        return readObject(join(COMMIT_DIR, hashCode), Commit.class);
     }
 }
