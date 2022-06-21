@@ -3,11 +3,9 @@ package gitlet;
 // TODO: any imports you need here
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.TreeMap;
+import java.util.*;
 
-import static gitlet.Repository.*;
+import static gitlet.Repository.COMMIT_DIR;
 import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
@@ -44,7 +42,7 @@ public class Commit implements Serializable {
 
     }
     public void setHashCode(){
-        hashCode = Utils.sha1(Utils.serialize(this));
+        hashCode = sha1(serialize(this));
     }
     public String getHashCode(){
         return hashCode;
@@ -53,10 +51,31 @@ public class Commit implements Serializable {
         return blobs.get(name);
     }
     public void addBlob(){}
+    public void inheritBlob(Commit parent){
+        this.blobs = parent.blobs;
+    }
+    public void addParent(String parent){
+        this.parent.add(parent);
+    }
     public void save(){
         writeObject(join(COMMIT_DIR, getHashCode()), this);
     }
+    //help the function rm
+    public boolean existBlob(String fileName){
+        return blobs.containsKey(fileName);
+    }
     public static Commit fromFile(String hashCode){
         return readObject(join(COMMIT_DIR, hashCode), Commit.class);
+    }
+    public void updateCommitWithStagedArea(StageArea stageArea){
+        //if the old fileName is same of the new, will replace it TreeMap  addtion
+        Set<Map.Entry<String,String >> entrySet = stageArea.getStagedForAddition().entrySet();
+        for(Map.Entry<String,String> entry : entrySet){
+            blobs.put(entry.getKey(), entry.getValue());
+        }
+        //removal   if the Set == null?
+        for(String entry: stageArea.getStagedForRemoval()){
+            blobs.remove(entry);
+        }
     }
 }

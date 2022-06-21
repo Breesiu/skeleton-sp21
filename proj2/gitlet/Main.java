@@ -36,10 +36,12 @@ public class Main {
                 Repository.commit(args[1]);
                 break;
             case "rm":
-
+                validateNum(args.length, 2);
+                Repository.rm(args[1]);
                 break;
             case "log":
-
+                validateNum(args.length, 1);
+                Repository.log();
                 break;
             case "global-log":
 

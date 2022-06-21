@@ -25,4 +25,10 @@ public class Header implements Serializable {
     public String getBranch(){
         return branch;
     }
+    public void setHashCode(String hashCode){
+        this.hashCode = hashCode;
+    }
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
 }
