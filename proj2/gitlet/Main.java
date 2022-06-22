@@ -44,13 +44,16 @@ public class Main {
                 Repository.log();
                 break;
             case "global-log":
-
+                validateNum(args.length, 1);
+                Repository.global_log();
                 break;
             case "find":
-
+                validateNum(args.length, 2);
+                Repository.find(args[1]);
                 break;
             case "status":
-
+                validateNum(args.length, 1);
+                Repository.status();
                 break;
             case "checkout":
 

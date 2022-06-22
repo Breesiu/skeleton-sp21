@@ -31,10 +31,11 @@ public class Commit implements Serializable {
     private ArrayList<String> parent;
     private TreeMap<String, String> blobs;
     private String hashCode;
-
-    public Commit(String message, Date date){
+    private String branch;
+    public Commit(String message, Date date, String branch){
         this.message = message;
         this.date = date;
+        this.branch = branch;
         parent = new ArrayList<>();
         blobs = new TreeMap<>();
     }
@@ -49,6 +50,12 @@ public class Commit implements Serializable {
     }
     public String getBlobHashCode(String name){
         return blobs.get(name);
+    }
+    public ArrayList<String> getParent(){
+        return parent;
+    }
+    public String getMessage(){
+        return message;
     }
     public void addBlob(){}
     public void inheritBlob(Commit parent){
@@ -77,5 +84,28 @@ public class Commit implements Serializable {
         for(String entry: stageArea.getStagedForRemoval()){
             blobs.remove(entry);
         }
+    }
+    // if NUll, print noting
+    public void print(){
+        if(parent.size() == 2){
+            System.out.println("===");
+            System.out.println("Merge " + getParent().get(0).substring(0, 7) + ' ' + getParent().get(1).substring(0, 7));
+            System.out.println("Date" + date.toString());
+            System.out.println(getMessage());
+            System.out.println("Merged" + getParent().get(1));
+            System.out.println();
+        }
+        else { // include the initial commit
+            System.out.println("===");
+            System.out.println("commit " + getHashCode());
+            System.out.println("Date" + date.toString());
+            System.out.println(getMessage());
+            System.out.println();
+        }
+    }
+    public void printFind(String message){
+        //don't jugde String = String
+        if(this.message.equals(message))
+            System.out.println(getHashCode());
     }
 }
