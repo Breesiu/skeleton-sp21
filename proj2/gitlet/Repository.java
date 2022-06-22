@@ -189,8 +189,6 @@ public class Repository {
          */
         //Modifications Not Staged For Commit
 
-
-
         //Untracked Files
     }
 
