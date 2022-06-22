@@ -3,8 +3,7 @@ package gitlet;
 import java.io.Serializable;
 
 import static gitlet.Repository.BLOB_DIR;
-import static gitlet.Utils.join;
-import static gitlet.Utils.writeObject;
+import static gitlet.Utils.*;
 
 public class Blob implements Serializable {
     private String hashCode;
@@ -23,6 +22,9 @@ public class Blob implements Serializable {
     }
     public String fileName(){
         return fileName;
+    }
+    public static Blob fromFile(String hashCode){
+        return readObject(join(BLOB_DIR, hashCode), Blob.class);
     }
     public void save(){
         writeObject(join(BLOB_DIR, getHashCode()), this);

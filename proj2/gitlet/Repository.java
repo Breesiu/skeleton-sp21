@@ -161,35 +161,99 @@ public class Repository {
         Commit commit = Commit.fromFile(header.getHashCode());
         TreeMap<String, String > stagedForAddition = stageArea.getStagedForAddition();
         TreeSet<String> stagedForRemoval = stageArea.getStagedForRemoval();
-
+        TreeMap<String, String> blobs = commit.getBlobs();
         //print Branch
         List<String> BranchList = plainFilenamesIn(POINT_DIR);
         BranchList.remove("header");
+
         Collections.sort(BranchList);
         System.out.println("=== Branches ===");
         for(String branch : BranchList){
             if(branch.equals(header.getBranch()))
                 System.out.print('*');
             System.out.println(branch);
-            System.out.println();
         }
+        System.out.println();
+
         //print Staged Files
         System.out.println("=== Staged Files ===");
         for(Iterator<String > it = stagedForAddition.keySet().iterator(); it.hasNext();){
             System.out.println(it.next());
         }
+        System.out.println();
+
         //print Removed Files
         System.out.println("=== Removed Files ===");
         for(Iterator<String > it = stagedForRemoval.iterator(); it.hasNext();){
             System.out.println(it.next());
+
         }
+        System.out.println();
+
         /**
          * The last two sections (modifications not staged and untracked files) are extra credit, worth 32 points.
          * Feel free to leave them blank (leaving just the headers).
          */
         //Modifications Not Staged For Commit
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        TreeSet<String> ModificationsNotStagedForCommit = new TreeSet<>();
+        //case1
+        for(Map.Entry<String,String> entry : blobs.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            //sha1(readContent) can be packed to a function?
+            if(join(CWD, key).exists() && !value.equals(sha1(readContents(join(CWD, key))))
+                && !stagedForAddition.containsKey(key))
+                ModificationsNotStagedForCommit.add(key + " (modified)");
+        }
+        //case2
+        for(Map.Entry<String,String> entry : stagedForAddition.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if(!value.equals(sha1(readContents(join(CWD, key)))))
+                ModificationsNotStagedForCommit.add(key + " (modified)");
+        }
+        //case3
+        for(Map.Entry<String,String> entry : stagedForAddition.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (!join(CWD, key).exists())
+                ModificationsNotStagedForCommit.add(key + " (deleted)");
+        }
+        //case4
+        for(Map.Entry<String,String> entry : blobs.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (!stagedForRemoval.contains(key) && !join(CWD, key).exists())
+                ModificationsNotStagedForCommit.add(key + " (deleted)");
+        }
+        //ascended sorting?
+        for(String item : ModificationsNotStagedForCommit){
+            System.out.println(item);
+        }
+        System.out.println();
 
-        //Untracked Files
+        /**
+         *Untracked Files  "This includes files that have been staged for removal,
+         *  but then re-created without Gitlet’s knowledge"  collides with operation of rm?
+         *  CWD filter?
+         */
+        System.out.println("=== Untracked Files ===");
+        List<String> cwdFileList = plainFilenamesIn(CWD);
+        TreeSet<String> untrackedFiles = new TreeSet<>();
+        for(String fileName : cwdFileList){
+            //case1
+            if(!stagedForAddition.containsKey(fileName) && !blobs.containsKey(fileName))
+                untrackedFiles.add(fileName);
+            //case2
+            if(stagedForRemoval.contains(fileName))
+                untrackedFiles.add(fileName);
+        }
+        for(String item : untrackedFiles){
+            System.out.println(item);
+        }
+        System.out.println();
+
     }
 
 }

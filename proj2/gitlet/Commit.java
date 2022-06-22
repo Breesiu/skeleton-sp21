@@ -51,6 +51,9 @@ public class Commit implements Serializable {
     public String getBlobHashCode(String name){
         return blobs.get(name);
     }
+    public TreeMap<String, String > getBlobs(){
+        return blobs;
+    }
     public ArrayList<String> getParent(){
         return parent;
     }
