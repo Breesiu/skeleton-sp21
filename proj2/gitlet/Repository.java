@@ -318,4 +318,20 @@ public class Repository {
         header.save();;
     }
 
+    /**
+     * Make sure that the behavior of your branch, checkout, and commit match what we’ve described above.
+     * This is pretty core functionality of Gitlet that many other commands will depend upon. If any of this core
+     * functionality is broken, very many of our autograder tests won’t work!
+     * ??Before you ever call branch, your code should be running with a default branch called “master”.
+     * @param branch
+     */
+    public static void branch(String branch){
+        List<String> BranchList = plainFilenamesIn(POINT_DIR);
+        if(BranchList.contains(branch)){
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        writeContents(join(POINT_DIR, branch), Header.fromFile().getHashCode());
+    }
+
 }
