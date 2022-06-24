@@ -277,7 +277,7 @@ public class Repository {
             System.exit(0);
         }
         if(!commit.existBlob(fileName)){
-            System.out.println("No commit with that id exists.");
+            System.out.println("File does not exist in that commit.");
             System.exit(0);
         }
         writeContents(join(CWD, fileName),
@@ -348,5 +348,47 @@ public class Repository {
         restrictedDelete(join(POINT_DIR, branch));
     }
 
+    /**
+     *  Checks out all the files tracked by the given commit.
+     *  Removes tracked files that are not present in that commit.?
+     *  ??If a working file is untracked in the current branch and would be overwritten by the reset,
+     *  print `There is an untracked file in the way; delete it, or add and commit it first.`
+     *  should I change the stageArea?
+     *
+     *  How to achieve it ?
+     *  runtime be subjucted to Should be constant with respect to any measure involving number of commits.
+     * @param commitId
+     */
+    public static void reset(String commitId){
+        Commit commit;
+        if((commit = Commit.getCommit(commitId)) == null) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+        Header header = Header.fromFile();
+        StageArea stageArea = StageArea.FromFile();
+        TreeSet<String> untrackedFiles = stageArea.getUntrackedFiles(Commit.fromFile(header.getHashCode()).getBlobs());
+        if(untrackedFiles == null){
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+        //can wrap it in function "checks out"?
+        for(Map.Entry<String,String> entry : commit.getBlobs().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            //need to convert byte[] to String
+            writeContents(join(CWD, key), readContents(join(BLOB_DIR, value)));
+        }
+        // Removes tracked files that are not present in that commit.
+        List<String> BranchList = plainFilenamesIn(POINT_DIR);
+        for(String fileName : BranchList){
+            if(!commit.getBlobs().containsKey(fileName))
+                restrictedDelete(join(CWD, fileName));
+        }
+
+        //convert the header
+        //?then what is the branch of headler
+        header.setHashCode(commit.getHashCode());
+    }
 
 }

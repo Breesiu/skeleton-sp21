@@ -73,7 +73,8 @@ public class Main {
                 Repository.rm_branch(args[1]);
                 break;
             case "reset":
-
+                validateNum(args.length, 2);
+                Repository.reset(args[1]);
                 break;
             case "merge":
 
