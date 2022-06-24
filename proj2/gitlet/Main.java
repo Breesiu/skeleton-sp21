@@ -56,10 +56,17 @@ public class Main {
                 Repository.status();
                 break;
             case "checkout":
-
+                //need to match the sign of "--"
+                if(args.length == 1)
+                    Repository.checkoutBranch(args[0]);
+                else if(args.length == 2)
+                    Repository.checkoutFilename(args[1]);
+                else if(args.length ==3)
+                    Repository.checkoutCommitidFilename(args[0], args[2]);
                 break;
             case "branch":
-
+                validateNum(args.length, 1);
+                Repository.branch();
                 break;
             case "rm-branch":
 

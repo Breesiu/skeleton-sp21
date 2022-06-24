@@ -111,4 +111,13 @@ public class Commit implements Serializable {
         if(this.message.equals(message))
             System.out.println(getHashCode());
     }
+    public static Commit getCommit(String commitId){
+        List<String> ComitHashCodeList = plainFilenamesIn(COMMIT_DIR);
+        ArrayList<Commit> CommitList = new ArrayList<>();
+        for(String hashCode: ComitHashCodeList){
+            if(hashCode.startsWith(commitId))
+                return fromFile(hashCode);
+        }
+        return null;
+    }
 }

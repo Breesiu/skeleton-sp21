@@ -10,7 +10,26 @@ public class StageArea implements Serializable {
 
     private TreeMap<String, String> stagedForAddition;
     private TreeSet<String> stagedForRemoval;
+    //need to be optimized
+//    private TreeSet<String> untrackedFiles;
 
+    public TreeSet<String> getUntrackedFiles(TreeMap<String, String> blobs){
+        List<String> cwdFileList = plainFilenamesIn(CWD);
+
+        TreeSet<String> untrackedFiles = new TreeSet<>();
+        untrackedFiles = null;
+        // if a class is newed, if it is null at first?
+//        untrackedFiles = null;
+        for(String fileName : cwdFileList){
+            //case1
+            if(!stagedForAddition.containsKey(fileName) && !blobs.containsKey(fileName))
+                untrackedFiles.add(fileName);
+            //case2
+            if(stagedForRemoval.contains(fileName))
+                untrackedFiles.add(fileName);
+        }
+        return untrackedFiles;
+    }
     public StageArea() {
         stagedForAddition = new TreeMap<>();
         stagedForRemoval = new TreeSet<>();

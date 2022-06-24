@@ -162,7 +162,7 @@ public class Repository {
         TreeMap<String, String > stagedForAddition = stageArea.getStagedForAddition();
         TreeSet<String> stagedForRemoval = stageArea.getStagedForRemoval();
         TreeMap<String, String> blobs = commit.getBlobs();
-        //print Branch
+        //print Branch          has error
         List<String> BranchList = plainFilenamesIn(POINT_DIR);
         BranchList.remove("header");
 
@@ -239,21 +239,83 @@ public class Repository {
          *  CWD filter?
          */
         System.out.println("=== Untracked Files ===");
-        List<String> cwdFileList = plainFilenamesIn(CWD);
-        TreeSet<String> untrackedFiles = new TreeSet<>();
-        for(String fileName : cwdFileList){
-            //case1
-            if(!stagedForAddition.containsKey(fileName) && !blobs.containsKey(fileName))
-                untrackedFiles.add(fileName);
-            //case2
-            if(stagedForRemoval.contains(fileName))
-                untrackedFiles.add(fileName);
-        }
+        TreeSet<String> untrackedFiles = stageArea.getUntrackedFiles(blobs);
         for(String item : untrackedFiles){
             System.out.println(item);
         }
         System.out.println();
+    }
+    public static void checkoutFilename(String fileName){
+        //Header header = Header.fromFile();
+        //if the fileName has been staged to the stagedForAddition?
+        Commit commit = Commit.fromFile(readContentsAsString(join(POINT_DIR, "header")));
+        if(!commit.existBlob(fileName)){
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        }
+        //Todo In this way,  the content of this file in CWD is byte[] , need to devise it to String
+        writeContents(join(CWD, fileName),
+                Blob.fromFile(commit.getBlobs().get(fileName)).getItem());
 
+
+    }
+
+    /**
+     * Unfortunately, using shortened ids might slow down the finding of objects if implemented naively (making the time
+     * to find a file linear in the number of objects), so we won’t worry about timing for commands that use shortened
+     * ids. We suggest, however, that you poke around in a .git directory (specifically, .git/objects) and see how it
+     * manages to speed up its search. You will perhaps recognize a familiar data structure implemented with the file
+     * system rather than pointers.
+     * How can I use Constant time to search the specific commit?   use Hash?
+     * @param commitId
+     * @param fileName
+     */
+    public static void checkoutCommitidFilename(String commitId, String fileName){
+        Commit commit;
+        if((commit = Commit.getCommit(commitId)) == null) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+        if(!commit.existBlob(fileName)){
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
+        writeContents(join(CWD, fileName),
+                Blob.fromFile(commit.getBlobs().get(fileName)).getItem());
+
+    }
+    public static void checkoutBranch(String branch){
+        List<String> BranchList = plainFilenamesIn(POINT_DIR);
+        BranchList.remove("header");
+        Header header = Header.fromFile();
+        if(BranchList.indexOf(branch) == -1){
+            System.out.println("No such branch exists.");
+            System.exit(0);
+        }
+        if(header.getBranch() == branch){
+            System.out.println("No need to checkout the current branch.");
+            System.exit(0);
+        }
+        StageArea stageArea = StageArea.FromFile();
+        TreeSet<String> untrackedFiles = null;
+        if((untrackedFiles = stageArea.getUntrackedFiles(Commit.fromFile(header.getHashCode()).getBlobs())) == null){
+            System.out.println("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
+            System.exit(0);
+        }
+        //if need to delete the file that are in the previous branch but not in the new branch
+        stageArea.cleanStaged();
+        header.setHashCode(readContentsAsString(join(POINT_DIR, branch)));
+        header.setBranch(branch);
+        Commit commit = Commit.fromFile(header.getHashCode());
+        for(Map.Entry<String,String> entry : commit.getBlobs().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            //need to convert byte[] to String
+            writeContents(join(CWD, key), readContents(join(BLOB_DIR, value)));
+        }
+        stageArea.save();
+        header.save();;
     }
 
 }
