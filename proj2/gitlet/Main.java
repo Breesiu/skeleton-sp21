@@ -69,7 +69,8 @@ public class Main {
                 Repository.branch(args[1]);
                 break;
             case "rm-branch":
-
+                validateNum(args.length, 2);
+                Repository.rm_branch(args[1]);
                 break;
             case "reset":
 

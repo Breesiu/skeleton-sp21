@@ -333,5 +333,20 @@ public class Repository {
         }
         writeContents(join(POINT_DIR, branch), Header.fromFile().getHashCode());
     }
+    public static void rm_branch(String branch){
+//        List<String> BranchList = new ArrayList<>();
+        //return false?  the way of contains?
+        List<String> BranchList = (ArrayList<String>)plainFilenamesIn(POINT_DIR);
+        if(!BranchList.contains(branch)) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        if(Header.fromFile().getBranch() == branch){
+            System.out.println("Cannot remove the current branch.");
+            System.exit(0);
+        }
+        restrictedDelete(join(POINT_DIR, branch));
+    }
+
 
 }
