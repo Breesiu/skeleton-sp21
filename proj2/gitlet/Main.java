@@ -77,7 +77,8 @@ public class Main {
                 Repository.reset(args[1]);
                 break;
             case "merge":
-
+                validateNum(args.length, 2);
+                Repository.merge(args[1]);
                 break;
 
             default:

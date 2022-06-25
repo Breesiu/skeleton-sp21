@@ -49,7 +49,7 @@ public class Repository {
         COMMIT_DIR.mkdir();
         BLOB_DIR.mkdir();
         POINT_DIR.mkdir();
-        Commit initialCommit = new Commit("initial commit", new Date(0), "master");
+        Commit initialCommit = new Commit("initial commit", new Date(0));
         initialCommit.setHashCode();
         String master = initialCommit.getHashCode();
         Header header = new Header(initialCommit.getHashCode(), "master");
@@ -81,9 +81,10 @@ public class Repository {
         }
 //        Commit preCommit = if I can pack these things to Class Commit?
         Commit preCommit = Commit.fromFile(Header.fromFile().getHashCode());
-        Commit commit = new Commit(message, new Date(), header.getBranch());
+        Commit commit = new Commit(message, new Date());
         commit.addParent(preCommit.getHashCode());
-        commit.inheritBlob(preCommit);
+        //devised
+        commit.inheritBlob();
         commit.updateCommitWithStagedArea(stageArea);
         commit.setHashCode();
         //Consider the hashCode of Commit will change，so the change of Header is after stageArea.cleanStaged
@@ -331,6 +332,7 @@ public class Repository {
             System.out.println("A branch with that name already exists.");
             System.exit(0);
         }
+        writeContents(join(POINT_DIR, "Spilt point"), Header.fromFile().getHashCode());
         writeContents(join(POINT_DIR, branch), Header.fromFile().getHashCode());
     }
     public static void rm_branch(String branch){
@@ -391,4 +393,139 @@ public class Repository {
         header.setHashCode(commit.getHashCode());
     }
 
+    /**
+     * ??untrackedFiles
+     *??If merge would generate an error because the commit that it does has no changes in it,
+     * just let the normal commit error message for this go through
+     *If an untracked file in the current commit would be overwritten or deleted by the merge, print There is
+     * an untracked file in the way; delete it, or add and commit it first. and exit
+     * ?Runtime: O(NlgN+D), where N is the total number of ancestor commits for the two branches and D is the total
+     * amount of data in all the files under these commits.
+     * @param branch
+     */
+    //how to make this function small?  add more function in it ?
+    public static void merge(String branch){
+        StageArea stageArea = StageArea.FromFile();
+        Header header = Header.fromFile();
+        Commit commit = Commit.fromFile(header.getHashCode());
+        if(!stageArea.getStagedForAddition().isEmpty() || !stageArea.getStagedForRemoval().isEmpty()){
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if(header.getBranch() == branch){
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        //?
+        TreeSet<String> untrackedFiles = stageArea.getUntrackedFiles(commit.getBlobs());
+        if(untrackedFiles == null){
+            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            System.exit(0);
+        }
+        //cost is high
+/*        TreeSet<String > commitIdInGivenBranch = new TreeSet<>();
+        List<String> commitIdInCurrentBranch = new ArrayList<>();
+        String currentBranchHead = header.getHashCode();
+        String givenBranchHead = readContentsAsString(join(POINT_DIR, branch));
+        commitIdInCurrentBranch.add(currentBranchHead)
+        do {
+            commitIdInCurrentBranch.add()
+        } while(commit.getParent().size() != 0);*/
+
+        //add a new pointer "split pointer, when "branch", then add.  when merge, then delete;"
+        String splitPointId = readContentsAsString(join(POINT_DIR, "Split point"));
+        String givenBranchHead = readContentsAsString(join(POINT_DIR, branch));
+        if(splitPointId == givenBranchHead){
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+        //If the split point is the current branch, then the effect is to check out the given branch,
+        if(splitPointId == header.getHashCode()){
+            //?
+            checkoutBranch(branch);
+
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        }
+        Commit commitSplitPoint = Commit.fromFile(splitPointId);
+        Commit commitGivenBranchHead = Commit.fromFile(givenBranchHead);
+        Commit commitCurrentBranchHead = Commit.fromFile(header.getHashCode());
+//        TreeMap<String, String> newBlobs = new TreeMap<>();
+        TreeSet<String> allIncludedFileName = new TreeSet<>();
+        //apply this idea to the function like status?  allIncludedFileName
+        //wrap it in function?
+        for(Map.Entry<String,String> entry : commitSplitPoint.getBlobs().entrySet()) {
+            String key = entry.getKey();
+            if(!allIncludedFileName.contains(key))
+                allIncludedFileName.add(key);
+        }
+        for(Map.Entry<String,String> entry : commitGivenBranchHead.getBlobs().entrySet()) {
+            String key = entry.getKey();
+            if(!allIncludedFileName.contains(key))
+                allIncludedFileName.add(key);
+        }
+        for(Map.Entry<String,String> entry : commitCurrentBranchHead.getBlobs().entrySet()) {
+            String key = entry.getKey();
+            if(!allIncludedFileName.contains(key))
+                allIncludedFileName.add(key);
+        }
+        Commit newCommit = new Commit();
+        newCommit.addParent(commit.getHashCode());
+        newCommit.inheritBlob();
+        for(String fileName : allIncludedFileName){
+            //modify includes delete?
+            //commit? inherit blobs的方法
+
+            //case1
+            if(commitSplitPoint.existBlob(fileName) && commitCurrentBranchHead.existBlob(fileName)
+            && commitGivenBranchHead.existBlob(fileName)){
+                if(commitCurrentBranchHead.getBlobHashCode(fileName) == commitSplitPoint.getBlobHashCode(fileName)
+                && commitSplitPoint.getBlobHashCode(fileName) != commitGivenBranchHead.getBlobHashCode(fileName)){
+                    newCommit.getBlobs().put(fileName, commitGivenBranchHead.getBlobHashCode(fileName));
+                    Repository.add(fileName);
+                }
+            }
+
+            //case2     should stay as they are
+//            if(commitSplitPoint.existBlob(fileName) && commitCurrentBranchHead.existBlob(fileName)
+//                    && commitGivenBranchHead.existBlob(fileName)) {
+//                if (commitCurrentBranchHead.getBlobHashCode(fileName) != commitSplitPoint.getBlobHashCode(fileName)
+//                        && commitSplitPoint.getBlobHashCode(fileName) == commitGivenBranchHead.getBlobHashCode(fileName)) {
+//                    newCommit.getBlobs().put(fileName, commitCurrentBranchHead.getBlobHashCode(fileName));
+//                }
+//            }
+            //case3  modify and delete
+//            if(commitSplitPoint.existBlob(fileName) && commitCurrentBranchHead.existBlob(fileName)
+//                    && commitGivenBranchHead.existBlob(fileName)) {
+//                if(commitCurrentBranchHead.getBlobHashCode(fileName) == commitGivenBranchHead.getBlobHashCode(fileName)
+//                && commitCurrentBranchHead.getBlobHashCode(fileName) != commitSplitPoint.getBlobHashCode(fileName)){
+//                    newCommit.getBlobs().put(fileName, commitCurrentBranchHead.getBlobHashCode(fileName));
+//                }
+//            }
+            //if both removed, do noting(according to the description)
+
+            //case4
+//            if(!commitSplitPoint.existBlob(fileName) && !commitGivenBranchHead.existBlob(fileName)
+//            && commitCurrentBranchHead.existBlob(fileName)){
+//                newCommit.getBlobs().put(fileName, commitCurrentBranchHead.getBlobHashCode(fileName));
+//            }
+            //case5
+            if(!commitSplitPoint.existBlob(fileName) && commitGivenBranchHead.existBlob(fileName)
+                    && !commitCurrentBranchHead.existBlob(fileName)){
+                //need to be tracked? added to newblobs
+//                newBlobs.put(fileName, commitCurrentBranchHead.getBlobHashCode(fileName));
+                writeContents(join(CWD, fileName),
+                        Blob.fromFile(commitGivenBranchHead.getBlobHashCode(fileName)).getItem());
+                stageArea.AddFile(fileName);
+            }
+            //case6   removed (and untracked?)
+            if(commitSplitPoint.existBlob(fileName) && !commitGivenBranchHead.existBlob(fileName)
+                    && commitCurrentBranchHead.existBlob(fileName)){
+                newCommit.removeBlob(fileName);
+            }
+            //case7
+
+        }
+
+    }
 }

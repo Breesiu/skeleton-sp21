@@ -32,15 +32,16 @@ public class Commit implements Serializable {
     private TreeMap<String, String> blobs;
     private String hashCode;
     private String branch;
-    public Commit(String message, Date date, String branch){
+    public Commit(String message, Date date){
         this.message = message;
         this.date = date;
-        this.branch = branch;
+//        this.branch = branch;
         parent = new ArrayList<>();
         blobs = new TreeMap<>();
     }
     public Commit(){
-
+        parent = new ArrayList<>();
+        blobs = new TreeMap<>();
     }
     public void setHashCode(){
         hashCode = sha1(serialize(this));
@@ -61,8 +62,12 @@ public class Commit implements Serializable {
         return message;
     }
     public void addBlob(){}
-    public void inheritBlob(Commit parent){
-        this.blobs = parent.blobs;
+    public void removeBlob(String fileName){
+        //用getBlobs to get the blobs, don't use it directly?
+        getBlobs().remove(fileName);
+    }
+    public void inheritBlob(){
+        this.blobs = Commit.fromFile(parent.get(0)).getBlobs();
     }
     public void addParent(String parent){
         this.parent.add(parent);
