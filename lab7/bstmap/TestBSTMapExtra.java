@@ -1,9 +1,11 @@
 package bstmap;
 
-import java.util.Set;
-import java.util.HashSet;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.*;
 
 /** Tests of optional parts of lab 7. */
 public class TestBSTMapExtra {
