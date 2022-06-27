@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.PushbackInputStream;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -472,6 +473,7 @@ public class Repository {
         Commit newCommit = new Commit();
         newCommit.addParent(commit.getHashCode());
         newCommit.inheritBlob();
+        boolean conflict = false;
         for(String fileName : allIncludedFileName){
             //modify includes delete?
             //commit? inherit blobs的方法
@@ -479,8 +481,8 @@ public class Repository {
             //case1
             if(commitSplitPoint.existBlob(fileName) && commitCurrentBranchHead.existBlob(fileName)
             && commitGivenBranchHead.existBlob(fileName)){
-                if(commitCurrentBranchHead.getBlobHashCode(fileName) == commitSplitPoint.getBlobHashCode(fileName)
-                && commitSplitPoint.getBlobHashCode(fileName) != commitGivenBranchHead.getBlobHashCode(fileName)){
+                if(commitCurrentBranchHead.getBlobHashCode(fileName).equals(commitSplitPoint.getBlobHashCode(fileName))
+                && !commitSplitPoint.getBlobHashCode(fileName).equals(commitGivenBranchHead.getBlobHashCode(fileName))){
                     newCommit.getBlobs().put(fileName, commitGivenBranchHead.getBlobHashCode(fileName));
                     Repository.add(fileName);
                 }
@@ -523,9 +525,64 @@ public class Repository {
                     && commitCurrentBranchHead.existBlob(fileName)){
                 newCommit.removeBlob(fileName);
             }
-            //case7
+            //case7  should remain absent.
 
+            //case8(1)
+            if(commitSplitPoint.existBlob(fileName) && !commitGivenBranchHead.existBlob(fileName)
+                    && commitCurrentBranchHead.existBlob(fileName)){
+                if(!commitCurrentBranchHead.getBlobHashCode(fileName).equals(commitSplitPoint.getBlobHashCode(fileName))){
+                    //Todo add the blob and need convert byte[] to string
+
+                    //stage it
+                    stageArea.AddFile(fileName);
+                    conflict = true;
+                }
+            }
+            //case8(2)
+            if(commitSplitPoint.existBlob(fileName) && commitGivenBranchHead.existBlob(fileName)
+                    && !commitCurrentBranchHead.existBlob(fileName)){
+                if(!commitGivenBranchHead.getBlobHashCode(fileName).equals(commitSplitPoint.getBlobHashCode(fileName))){
+                    //Todo add the blob and need convert byte[] to string
+
+                    //stage it
+                    stageArea.AddFile(fileName);
+                    conflict = true;
+
+                }
+            }
+            //case8(3)
+            if(commitSplitPoint.existBlob(fileName) && commitGivenBranchHead.existBlob(fileName)
+                    && commitCurrentBranchHead.existBlob(fileName)){
+                // all are different from each other
+                if(!commitGivenBranchHead.getBlobHashCode(fileName).equals(commitSplitPoint.getBlobHashCode(fileName))
+                && !commitSplitPoint.getBlobHashCode(fileName).equals(commitCurrentBranchHead.getBlobHashCode(fileName))
+                && !commitCurrentBranchHead.getBlobHashCode(fileName).equals(commitGivenBranchHead.getBlobHashCode(fileName))){
+                    //Todo add the blob and need convert byte[] to string
+
+                    //stage it
+                    stageArea.AddFile(fileName);
+                    conflict = true;
+
+                }
+            }
+        }
+        //log message
+        if(conflict){
+            System.out.println("Encountered a merge conflict.");
+        }else{
+            //log message
+            System.out.println("Merged " +branch+ " into " + header.getBranch() + ".");
         }
 
+        newCommit.addParent(commitGivenBranchHead.getHashCode());
+        newCommit.setHashCode();
+        header.setHashCode(newCommit.getHashCode());
+        restrictedDelete(join(POINT_DIR, "Split point"));
+        restrictedDelete(join(POINT_DIR, branch));
+        header.save();
+        newCommit.save();
+        stageArea.save();
+
+        public void static String
     }
 }
