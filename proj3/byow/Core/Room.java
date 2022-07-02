@@ -3,6 +3,9 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.Random;
+
+
 public class Room {
     //contain the length of the wall
     private int width;
@@ -10,6 +13,7 @@ public class Room {
     private Position leftDown = null;
     // used to Prim
     private Position center = null;
+    private static final Random RANDOM = new Random();
 
     //TODO static?
     public static class Position {
@@ -44,7 +48,11 @@ public class Room {
     public Position getCenter() {
         return center;
     }
-
+    public Position RandomSelectInnerPos(){
+        Position position = new Position(leftDown.x + RANDOM.nextInt(1,width - 1),
+                                            leftDown.y + RANDOM.nextInt(1, height - 1));
+        return position;
+    }
     //when need to devise rooms of different shapes, then should hava a drawhelper to draw one line and shift
     public void draw(TETile[][] tiles) {
         //TODO drawline function
