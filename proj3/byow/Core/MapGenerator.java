@@ -3,9 +3,7 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static byow.Core.Engine.HEIGHT;
 import static byow.Core.Engine.WIDTH;
@@ -52,6 +50,25 @@ public class MapGenerator {
         }
     }
     public void initializeHallways(TETile[][] tiles){
+        //pickup room
+        List<Room> roomList = new ArrayList<>(existRoom);
+        List<Boolean> vis = new ArrayList<>();
+        double[][] disGragh = new double[roomList.size()][roomList.size()];
+        PriorityQueue<Edge> minHeap = new PriorityQueue<Edge>(new Comparator<Edge>() {
+            @Override//minHeap？
+            public int compare(Edge o1, Edge o2) {
+                // TODO Auto-generated method stub
+                return Double.compare(o1.getDis(), o2.getDis());
+            }
+        });
+        //prim
+//        minHeap.add();
+        //yinyongchuandi and zhichuandi
+        initializePrim(roomList, vis, disGragh, minHeap);
+        for(int i = 0; i < existRoom.size() - 1; i++){
+            ToBeLinkedRoom toBeLinkedRoom = Prim(roomList, vis, disGragh, minHeap);
+            addHallway(toBeLinkedRoom.getSrc(), toBeLinkedRoom.getDst());
+        }
 
     }
     public boolean isRoomOverlap(Room room, TETile[][] tiles) {
@@ -98,5 +115,91 @@ public class MapGenerator {
         room.draw(tiles);
         existRoom.add(room);
     }
+    public static double dis(Room.Position p1, Room.Position p2){
+        return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+    }
+    public void initializePrim(List<Room> roomList, List<Boolean> vis, double[][] disGragh, PriorityQueue<Edge> minHeap){
+        for(int i = 0; i < roomList.size(); i++){
+            vis.add(false);
+            for(int j = 0; j < roomList.size(); j ++)
+                disGragh[i][j] = dis(roomList.get(i).getCenter(), roomList.get(j).getCenter());
+        }
+    }
+    public ToBeLinkedRoom Prim(List<Room> roomList, List<Boolean> vis, double[][] disGragh, PriorityQueue<Edge> minHeap){
 
+    }
+
+    /**
+     * assume that psrc is in the left of pdst    but need to cope with the up and down
+     * @param src
+     * @param dst
+     */
+    public void addHallway(Room src, Room dst){
+        Room.Position psrc = src.selectInnerPos();
+        Room.Position pdst = src.selectInnerPos();
+        //note edge case
+        //first vertical then horizon
+        if(RANDOM.nextBoolean()){
+            if(pdst.y > psrc.y){
+                while(psrc.y++ != pdst.y )
+                    addHallwayVerticalSlice(psrc);
+            }else {
+                while (psrc.y-- != pdst.y)
+                    addHallwayVerticalSlice(psrc);
+            }
+            if(pdst.x != psrc.x)
+                addHallwayCorner(psrc);
+            while(psrc.x++ != pdst.y) {
+                addHallwayHorizontal(psrc);
+            }
+        }else {
+            while(psrc.x++ != pdst.y) {
+                addHallwayHorizontal(psrc);
+            }
+            if(pdst.x != psrc.x)
+                addHallwayCorner(psrc);
+            if(pdst.y > psrc.y){
+                while(psrc.y++ != pdst.y ) {
+                    addHallwayVerticalSlice(psrc);
+                }
+            }else {
+                while (psrc.y-- != pdst.y) {
+                    addHallwayVerticalSlice(psrc);
+                }
+            }
+        }
+    }
+}
+class Edge{
+    private int src;
+    private int dst;
+    private double dis;
+    Edge(int src, int dst, double dis){
+        this.src = src;
+        this.dst = dst;
+        this.dis = dis;
+    }
+    public Room.Position getSrc(){
+        return src;
+    }
+    public Room.Position getDst(){
+        return dst;
+    }
+    public double getDis(){
+        return dis;
+    }
+}
+class ToBeLinkedRoom{
+    private Room src;
+    private Room dst;
+    ToBeLinkedRoom(Room src, Room dst){
+        this.src = src;
+        this.dst = dst;
+    }
+    public Room getSrc(){
+        return src;
+    }
+    public Room getDst(){
+        return dst;
+    }
 }
