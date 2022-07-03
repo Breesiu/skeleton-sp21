@@ -24,7 +24,7 @@ public class MainDemo {
         //put tilesNew in the MapGenerator?
         TETile[][] world = new TETile[WIDTH][HEIGHT];
         MapGenerator mapGenerator = new MapGenerator();
-        mapGenerator.randomGenerate(world);
+        mapGenerator.randomGenerate(world,ter);
 
         // draws the world to the screen
         ter.renderFrame(world);

@@ -1,5 +1,6 @@
 package byow.Core;
 
+import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
@@ -19,7 +20,7 @@ public class MapGenerator {
     //Can add a width to seperate the adjacent rooms
     MapGenerator() {
         existRoom = new HashSet<>();
-        roomNum = RANDOM.nextInt(25, 30);
+        roomNum = RANDOM.nextInt(40, 41);
 
     }
 
@@ -31,10 +32,11 @@ public class MapGenerator {
         }
     }
 
-    public void randomGenerate(TETile[][] tiles) {
+    public void randomGenerate(TETile[][] tiles, TERenderer ter) {
         initializeNothing(tiles);
         initializeRooms(tiles);
-        initializeHallways(tiles);
+        initializeHallways(tiles, ter);
+        Hallway.fillCorner(tiles);
 
     }
 
@@ -44,8 +46,8 @@ public class MapGenerator {
             Room room = null;
             //TODO maybe will be too crowded!
             //control the the size of room, so it's not be confused in room.draw
-            int width = RANDOM.nextInt(4, 12);
-            int length = RANDOM.nextInt(4, 12);
+            int width = RANDOM.nextInt(4, 11);
+            int length = RANDOM.nextInt(4, 11);
             do {
                 room = new Room(RANDOM.nextInt(0, 100), RANDOM.nextInt(0, 50), width, length);
             } while (isRoomOverBound(room) || isRoomOverlap(room, tiles)); //duanlu   this order can't be reversed
@@ -53,7 +55,7 @@ public class MapGenerator {
         }
     }
 
-    public void initializeHallways(TETile[][] tiles) {
+    public void initializeHallways(TETile[][] tiles, TERenderer ter) {
         //pickup room
         List<Room> roomList = new ArrayList<>(existRoom);
         List<Boolean> vis = new ArrayList<>();
@@ -70,6 +72,10 @@ public class MapGenerator {
         initializePrim(roomList, vis, disGragh, minHeap);
         for (int i = 0; i < existRoom.size() - 1; i++) {
             ToBeLinkedRoom toBeLinkedRoom = Prim(roomList, vis, disGragh, minHeap);
+//            ter.renderFrame(tiles);
+////            Thread.currentThread().sleep(5000);
+//            if(i >= 12)
+//                for(double j = 1; j <= 1000000000; j++);
             addHallway(toBeLinkedRoom.getSrc(), toBeLinkedRoom.getDst(), tiles);
         }
 
@@ -152,7 +158,12 @@ public class MapGenerator {
         toBeLinkedRoom = new ToBeLinkedRoom(roomsrc, roomdst);
         return toBeLinkedRoom;
     }
-
+    public boolean isRandomPosionCollideWithWall(Room.Position p, Room room){
+        if(p.x == room.getLeftDown().x || p.x == room.getLeftDown().x + room.getWidth() - 1
+            || p.y == room.getLeftDown().y || p.x == room.getLeftDown().y + room.getHeight() - 1)
+            return true;
+        return false;
+    }
     /**
      * AttentionPlease!!! assume that psrc is in the left of pdst    but need to cope with the up and down
      *
@@ -160,50 +171,62 @@ public class MapGenerator {
      * @param dst
      */
     public void addHallway(Room src, Room dst, TETile[][] tiles) {
-        Room.Position psrc = src.RandomSelectInnerPos();
-        Room.Position pdst = dst.RandomSelectInnerPos();
+        Room.Position psrc = null;
+        Room.Position pdst = null;
+        do {
+            psrc = src.RandomSelectInnerPos();
+            pdst = dst.RandomSelectInnerPos();
+        }while(isRandomPosionCollideWithWall(psrc, dst) || isRandomPosionCollideWithWall(pdst, src));
         if(psrc.x > pdst.x){
             Room.Position tmp = psrc;
             psrc = pdst;
             pdst = tmp;
         }
         //debug
-        System.out.println("psrc.x"+psrc.x + "  " + "psrc.y"+psrc.y + "  " +"pdst.x"+pdst.x + "  " +"pdst.y"+pdst.y + "  ");
+//        System.out.println("psrc.x"+psrc.x + "  " + "psrc.y"+psrc.y + "  " +"pdst.x"+pdst.x + "  " +"pdst.y"+pdst.y + "  ");
 
         //note edge case
         //first vertical then horizon
         if(RANDOM.nextBoolean()) {
             if (pdst.y > psrc.y) {
-                while (psrc.y++ != pdst.y)
-                    Hallway.addHallwayVerticalSlice(psrc,tiles);
+                while (psrc.y != pdst.y) {
+                    Hallway.addHallwayVerticalSlice(psrc, tiles);
+                    psrc.y++;
+                }
             } else {
-                while (psrc.y-- != pdst.y)
-                    Hallway.addHallwayVerticalSlice(psrc,tiles);
+                while (psrc.y != pdst.y) {
+                    Hallway.addHallwayVerticalSlice(psrc, tiles);
+                    psrc.y--;
+                }
             }
             //
 //            if(isRoomOverlapHelper(psrc, ))
 //            if (pdst.x != psrc.x && !(isRoomOverlapHelper(psrc,src) || isRoomOverlapHelper(psrc, dst)))
-            Hallway.addHallwayCorner(psrc,tiles);
-            while (psrc.x++ != pdst.x) {
+//            Hallway.addHallwayCorner(psrc,tiles);
+            while (psrc.x != pdst.x) {
                 Hallway.addHallwayHorizontalSlice(psrc,tiles);
+                psrc.x ++;
             }
         }else {
-            while(psrc.x++ != pdst.x) {
+            while(psrc.x != pdst.x) {
                 Hallway.addHallwayHorizontalSlice(psrc,tiles);
+                psrc.x ++;
+
             }
 //            if (pdst.x != psrc.x && !(isRoomOverlapHelper(psrc,src) || isRoomOverlapHelper(psrc, dst)))
-            Hallway.addHallwayCorner(psrc,tiles);
+//            Hallway.addHallwayCorner(psrc,tiles);
             if(pdst.y > psrc.y){
-                while(psrc.y++ != pdst.y ) {
+                while(psrc.y != pdst.y ) {
                     Hallway.addHallwayVerticalSlice(psrc,tiles);
+                    psrc.y++;
                 }
             }else {
-                while (psrc.y-- != pdst.y) {
+                while (psrc.y != pdst.y) {
                     Hallway.addHallwayVerticalSlice(psrc,tiles);
+                    psrc.y--;
                 }
             }
         }
-        Hallway.fillCorner(tiles);
     }
 }
 class Edge{
