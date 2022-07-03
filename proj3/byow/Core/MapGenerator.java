@@ -11,8 +11,9 @@ import static byow.Core.Engine.WIDTH;
 
 
 public class MapGenerator {
-    private static final long SEED = 2873123;
-    private static final Random RANDOM = new Random();
+//    private static final long SEED = 2873123;
+//    private int seed;
+    private static final Random RANDOM = new Random(0);
     private Set<Room> existRoom = null;
     private int roomNum;
 
@@ -21,7 +22,6 @@ public class MapGenerator {
     MapGenerator() {
         existRoom = new HashSet<>();
         roomNum = RANDOM.nextInt(40, 41);
-
     }
 
     public void initializeNothing(TETile[][] tiles) {
@@ -38,6 +38,7 @@ public class MapGenerator {
         initializeHallways(tiles, ter);
         Hallway.fillCorner(tiles);
 
+        addExit(tiles);
     }
 
     public void initializeRooms(TETile[][] tiles) {
@@ -110,7 +111,7 @@ public class MapGenerator {
      * @param room
      * @return
      */
-    private boolean isRoomOverlapHelper(Room.Position position, Room room) {
+    private boolean isRoomOverlapHelper(Position position, Room room) {
         if (position.x >= room.getLeftDown().x && position.x < room.getLeftDown().x + room.getWidth()
                 && position.y >= room.getLeftDown().y && position.y < room.getLeftDown().y + room.getHeight())
             return true;
@@ -129,7 +130,7 @@ public class MapGenerator {
         existRoom.add(room);
     }
 
-    public static double dis(Room.Position p1, Room.Position p2) {
+    public static double dis(Position p1, Position p2) {
         return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
     }
 
@@ -158,7 +159,7 @@ public class MapGenerator {
         toBeLinkedRoom = new ToBeLinkedRoom(roomsrc, roomdst);
         return toBeLinkedRoom;
     }
-    public boolean isRandomPosionCollideWithWall(Room.Position p, Room room){
+    public boolean isRandomPosionCollideWithWall(Position p, Room room){
         if(p.x == room.getLeftDown().x || p.x == room.getLeftDown().x + room.getWidth() - 1
             || p.y == room.getLeftDown().y || p.x == room.getLeftDown().y + room.getHeight() - 1)
             return true;
@@ -171,14 +172,14 @@ public class MapGenerator {
      * @param dst
      */
     public void addHallway(Room src, Room dst, TETile[][] tiles) {
-        Room.Position psrc = null;
-        Room.Position pdst = null;
+        Position psrc = null;
+        Position pdst = null;
         do {
             psrc = src.RandomSelectInnerPos();
             pdst = dst.RandomSelectInnerPos();
         }while(isRandomPosionCollideWithWall(psrc, dst) || isRandomPosionCollideWithWall(pdst, src));
         if(psrc.x > pdst.x){
-            Room.Position tmp = psrc;
+            Position tmp = psrc;
             psrc = pdst;
             pdst = tmp;
         }
@@ -227,6 +228,36 @@ public class MapGenerator {
                 }
             }
         }
+    }
+    public void addExit(TETile[][] tiles){
+        Position exitPos = new Position();
+        do{
+            exitPos.x = RANDOM.nextInt(0, WIDTH);
+            exitPos.y = RANDOM.nextInt(0, HEIGHT);
+        }while (!canBeExit(exitPos, tiles));
+        tiles[exitPos.x][exitPos.y] = Tileset.UNLOCKED_DOOR;
+    }
+    public boolean canBeExit(Position exispos, TETile[][] tiles){
+        if(tiles[exispos.x][exispos.y] == Tileset.WALL ){
+            if(exispos.x == 0){
+                if(tiles[exispos.x + 1][exispos.y] == Tileset.FLOOR)
+                    return true;
+            }else if(exispos.x == WIDTH - 1) {
+                if (tiles[exispos.x - 1][exispos.y] == Tileset.FLOOR)
+                    return true;
+            }else if(exispos.y == 0) {
+                if (tiles[exispos.x][exispos.y + 1] == Tileset.FLOOR)
+                    return true;
+            }else if(exispos.y == HEIGHT - 1) {
+                if (tiles[exispos.x][exispos.y - 1] == Tileset.FLOOR)
+                    return true;
+            }else {
+                if(tiles[exispos.x + 1][exispos.y] == Tileset.FLOOR || tiles[exispos.x - 1][exispos.y] == Tileset.FLOOR
+                    || tiles[exispos.x][exispos.y + 1] == Tileset.FLOOR || tiles[exispos.x][exispos.y - 1] == Tileset.FLOOR)
+                    return true;
+            }
+        }
+        return false;
     }
 }
 class Edge{

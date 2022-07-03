@@ -16,16 +16,6 @@ public class Room {
     private static final Random RANDOM = new Random();
 
     //TODO static?
-    public static class Position {
-        int x;
-        int y;
-
-        Position(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
     Room(int x, int y, int width, int height) {
         this.width = width;
         this.height = height;

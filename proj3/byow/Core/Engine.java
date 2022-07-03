@@ -1,19 +1,65 @@
 package byow.Core;
 
+import byow.InputDemo.KeyboardInputSource;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import byow.TileEngine.Tileset;
+
+import java.util.Random;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 90;
     public static final int HEIGHT = 50;
+    private Random rand;
+    private int seed;
+    private boolean gameOver;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
     public void interactWithKeyboard() {
+        seed = 0;
+        rand = new Random(seed);
+        gameOver = false;
+        ter.initialize(WIDTH, HEIGHT);
+        TETile[][] world = new TETile[WIDTH][HEIGHT];
+        MapGenerator mapGenerator = new MapGenerator();
+        mapGenerator.randomGenerate(world, ter);
+        ter.renderFrame(world);
+        KeyboardInputSource keyboardInputSource = new KeyboardInputSource();
+        char c;
+        Avatar avatar = new Avatar(seed, world);
+        ter.renderFrame(world);
+        do {
+            c = keyboardInputSource.getNextKey();
+            switch (c) {
+                case 'W':
+//                    System.out.println("w");
+//                    if(avatar.getExit())
+                    avatar.toUp(world);
+                    break;
+                case 'S':
+                    avatar.toDown(world);
+                    break;
+                case 'A':
+                    avatar.toLeft(world);
+                    break;
+                case 'D':
+                    avatar.toRight(world);
+                    break;
+                default:
+                    break;
+
+            }
+            if(world[avatar.getCurPos().x][avatar.getCurPos().y] == Tileset.UNLOCKED_DOOR)
+                gameOver = true;
+            ter.renderFrame(world);
+        } while (!gameOver);
+//        StdDraw.clear();
+        ter.initialize(WIDTH, HEIGHT);
     }
 
     /**
