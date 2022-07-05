@@ -4,6 +4,7 @@ import byow.InputDemo.KeyboardInputSource;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+import edu.princeton.cs.introcs.StdDraw;
 
 import java.util.Random;
 
@@ -32,30 +33,49 @@ public class Engine {
         KeyboardInputSource keyboardInputSource = new KeyboardInputSource();
         char c;
         Avatar avatar = new Avatar(seed, world);
-        ter.renderFrame(world);
+//        ter.renderFrame(world);
+        // the Pos of chaser is not diministic?
+        Chaser chaser = new Chaser(seed, world);
+//        chaser.run();
         do {
-            c = keyboardInputSource.getNextKey();
-            switch (c) {
-                case 'W':
+//            c = keyboardInputSource.getNextKey();
+            // through this way, IO is not be blocked
+            if(StdDraw.hasNextKeyTyped()) {
+                c = StdDraw.nextKeyTyped();
+                c = Character.toUpperCase(c);
+                System.out.println("s");
+                switch (c) {
+                    case 'W':
 //                    System.out.println("w");
 //                    if(avatar.getExit())
-                    avatar.toUp(world);
-                    break;
-                case 'S':
-                    avatar.toDown(world);
-                    break;
-                case 'A':
-                    avatar.toLeft(world);
-                    break;
-                case 'D':
-                    avatar.toRight(world);
-                    break;
-                default:
-                    break;
+                        avatar.toUp(world);
+                        break;
+                    case 'S':
+                        avatar.toDown(world);
+                        break;
+                    case 'A':
+                        avatar.toLeft(world);
+                        break;
+                    case 'D':
+                        avatar.toRight(world);
+                        break;
+                    default:
+                        break;
 
+                }
+                System.out.println("s");
+
+                chaser.chaseAvatarA_Star(avatar.getCurPos(), world);
+                //object equals
+                if(chaser.getCurPos().equals(avatar.getCurPos())){
+                    gameOver = true;
+                }
+                System.out.println("s");
+
+                if (world[avatar.getCurPos().x][avatar.getCurPos().y] == Tileset.UNLOCKED_DOOR)
+                    gameOver = true;
             }
-            if(world[avatar.getCurPos().x][avatar.getCurPos().y] == Tileset.UNLOCKED_DOOR)
-                gameOver = true;
+//            chaser.chaseAvatarA_Star(avatar.getCurPos(), world);
             ter.renderFrame(world);
         } while (!gameOver);
 //        StdDraw.clear();

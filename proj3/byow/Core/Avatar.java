@@ -18,12 +18,16 @@ public class Avatar {
         rand = new Random(seed);
         this.curPos = getRandomFloorPos(world);
         world[curPos.x][curPos.y] = Tileset.AVATAR;
-        System.out.println("sd");
     }
     public void toUp(TETile[][] world){
         Position nextPos = new Position(curPos.x, curPos.y + 1);
         if(isCollidedWithWall(nextPos, world))
             return;
+        if(getExit(nextPos, world)){
+            world[curPos.x][curPos.y] = Tileset.FLOOR;
+            curPos = nextPos;
+            return;
+        }
         world[curPos.x][curPos.y] = Tileset.FLOOR;
         curPos = nextPos;
         world[curPos.x][curPos.y] = Tileset.AVATAR;
@@ -33,6 +37,11 @@ public class Avatar {
         Position nextPos = new Position(curPos.x, curPos.y - 1);
         if(isCollidedWithWall(nextPos, world))
             return;
+        if(getExit(nextPos, world)){
+            world[curPos.x][curPos.y] = Tileset.FLOOR;
+            curPos = nextPos;
+            return;
+        }
         world[curPos.x][curPos.y] = Tileset.FLOOR;
         curPos = nextPos;
         world[curPos.x][curPos.y] = Tileset.AVATAR;
@@ -42,6 +51,11 @@ public class Avatar {
         Position nextPos = new Position(curPos.x - 1, curPos.y);
         if(isCollidedWithWall(nextPos, world))
             return;
+        if(getExit(nextPos, world)){
+            world[curPos.x][curPos.y] = Tileset.FLOOR;
+            curPos = nextPos;
+            return;
+        }
         world[curPos.x][curPos.y] = Tileset.FLOOR;
         curPos = nextPos;
         world[curPos.x][curPos.y] = Tileset.AVATAR;
